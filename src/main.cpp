@@ -13,11 +13,11 @@ double prev_cte=0.0;
 double sum_cte=0.0;
 std::vector<double> integral_sum;
 
-double p[3]={0.05,0.00005,0.0003},dp[3]={0.005,0.000005,0.00003};
+
 double best_err=200;
 int param_to_tune = 0; 
 int idx=0;//0=kp,1=ki,2=kd
-int twiddle=1;
+
 double throttle = 0.3;
 int step=0;
 double t_error=0.0;
@@ -90,57 +90,7 @@ int main() {
            *   Maybe use another PID controller to control the speed!
            */
           //Twiddle
-//          if((twiddle==1)&&(step%100==0))
-//          {
-//		  if(best_err<0.00001)
-//		  	twiddle=0;
-//		  	
-//		  std::cout<<"Best err: "<<best_err<<p[0]<<" "<<p[1]<<" "<<p[2]<<std::endl;
-//          
-//          if(param_to_tune==0)
-//          {
-//          	p[idx]+=dp[idx];
-//          	param_to_tune+=1;
-//		  }
-//		  else if(param_to_tune==1)
-//		  {
-//		  	if(cte<best_err)
-//		  	{
-//		  		best_err = cte;
-//		  		dp[idx]*=1.1;
-//		  		idx = (idx+1)%3;
-//		  		p[idx]+=dp[idx];
-//		  		param_to_tune=1;
-//			}
-//			else
-//			{
-//				p[idx] -= 2*dp[idx];
-//				param_to_tune=2;
-//			}
-//		  }
-//		  else
-//		  {
-//		  	//param_to_tune=2
-//		  	if(cte<best_err)
-//		  	{
-//		  		best_err = cte;
-//		  		dp[idx]*=1.1;
-//		  		idx = (idx+1)%3;
-//		  		p[idx]+=dp[idx];
-//		  		param_to_tune=1;
-//			  }
-//			else
-//			{
-//				p[idx] += dp[idx];
-//				dp[idx]*=0.9;
-//				idx = (idx+1)%3;
-//				p[idx]+=dp[idx];
-//		  		param_to_tune=1;
-//			}
-//		  }
-//		  
-//		  pid.Init(p[0],p[1],p[2]);
-//		}
+
           double tot_sum = std::accumulate(integral_sum.begin(), integral_sum.end(), 0);
           pid.UpdateError(cte,prev_cte,tot_sum);
           
@@ -163,9 +113,7 @@ int main() {
           	steer_value = -1;
           step+=1;
           
-//          if(step%100==0)
-//          	sum_cte = fmod(sum_cte,10.0);
-          	
+
           double speed_desired = 30;
           double current_speed = speed;
           t_error = speed - speed_desired;
@@ -175,16 +123,7 @@ int main() {
          prev_t_error = t_error;
          sum_t_error += t_error;
          std::cout<<"Throttle: "<<throttle_value<<std::endl;
-//		 if(((steer_value>=0.75)&&(steer_value<=1))||((steer_value<=-0.75)&&(steer_value>=-1)))
-//		 {
-//		 	throttle = throttle - 0.02;
-//		 }
-//		 else
-//		 {
-//		 	//throttle = ((1/steer_value) - 0.45)/((1.0 - 0.45));
-//		 	throttle = throttle + 0.02;
-//		 }
-        
+
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
                     << std::endl;
