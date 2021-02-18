@@ -33,6 +33,62 @@
 <p> The Integral element is also modified to take the previous 50 CTE error alone detect the current steering angle.This allows faster response when the PD didn't converge and we have sharp corners.</p>
 
 
+<h2>PID Equation </h2>
+
+<img src="" alt="pid"/>
+
+<h2> System architecture </h2>
+
+<p> We use separate controller to control the steering angle and a separate controller for controlling the throttle. The steering angle controller uses CTE as the error metric while the throttle controller uses Current Speed -  desired speed (30mph) as the error metric.</p>
+
+<img src="" alt="control"/>
+
+<h2> Tuned Values </h2>
+
+<p> The Tuning of the Kp,Ki and Kd values is done manually based on the above definition. The values are given in the below table.</p>
+
+<h3> Steering angle Controller </h3>
+
+| Kp | Ki | Kd |
+|  :---: |     :---:      |    :---:      |
+| 0.15   | 0.00000005     | 1.1           |
+
+<h3> Throttle Controller </h3>
+
+| Kp | Ki | Kd |
+|  :---: |     :---:      |    :---:      |
+| 0.3   | 0.0003     | 0.003          |
 
 
+<h2> Implementation Steps </h2>
+
+```
+Download the simulator from the repo
+https://github.com/udacity/self-driving-car-sim/releases
+Make a build directory: mkdir build && cd build
+Compile: cmake .. && make
+Run it: ./pid
+
+```
+<h2> Output Recorded Videos </h2>
+
+```
+
+```
+
+<h2>Higher Speed Control action </h2>
+
+<h3>Architecture of high speed control</h3>
+
+<img src="" alt="highspeed"/>
+
+<p> The above controller works well for lower speeds of 30mph.Sometimes in straight lanes we must increase the speed to reach the goal faster.In the same way we need to decrease the speed which was in the stright lane to make a turn. To facilitate that we have added additional controller for speed reduction. Here we just use PD controller. The key here is that we only reduce the speed when the absolute value CTE is higher and only when the speed is greater than 30mph. Since at 30mph the car don't go to oscillations in sharp turns.</p>
+
+<p> The drawback of this method is that the car oscillates around the steady state due to the sudden reduction speed. If we just reduce the throttle value in steps of 0.1 when the bsolute value CTE is higher and  when the speed is greater than 30mph, this may fail at sharp turns since after travelling through the straight road before reaching the turn the car will be at high speed and gradual decrease may not be sufficient to make a turn. Thus the PD controller solves that but we may have oscillation around the steady state.</p>
+
+<h3> Output of high speed control </h3>
+
+```
+
+```
 
