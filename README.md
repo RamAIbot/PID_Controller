@@ -1,98 +1,38 @@
-# CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+# PID Controller
 
----
+[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
-## Dependencies
+<p> The project focuses on designing a PID controller for the autonomous vehicle to drive through the simulated environment which is done by Unity. The car travles with a constant speed of 30mph and the PID controller controls the steering angles based on the manoeuvre. An additional PID controller is used to keep the speed at 30mph to prevent any accidents.</p>
 
-* cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1(mac, linux), 3.81(Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets 
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
-* Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
+<img src="" alt="title"/>
 
-Fellow students have put together a guide to Windows set-up for the project [here](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/files/Kidnapped_Vehicle_Windows_Setup.pdf) if the environment you have set up for the Sensor Fusion projects does not work for this project. There's also an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3).
+<h2> PID Controller </h2>
 
-## Basic Build Instructions
+<h3> Proportional Controller </h3>
 
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
+<p> The proportional component is useful for finding out the suddent change in error and act accordingly. The error function we use here is the Cross track error which is the difference between the vehcile location from the center of the lane. The proportional controller just adjusts the steering value with the constant Kp multiplied with the cross track error. This enables the vehcile to track error fast and act faster.</p>
 
-Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
+<p> The main drawback of this P controller is that the vehicle overshoots the desired position and then comes back to it by adjusting the steering angle in opposite direction based on the error. But this overshoot drives our vehicle to oscillations as the car crosses the center lane each time and while coming back to center it again overshoots and causes oscillation.</p>
 
-## Editor Settings
+<h3> Proportional Derivative Controller </h3>
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+<p> To solve this oscillations around the steady state, we add an derivative component. The derivate component takes the difference between the previous cross track error and present cross track error divided by time difference and multiplies by constant Kd. This causes the error to steady state without any overshoot thus eliminating the oscillations around the steady state. Based on the difference between the previous and current CTE value it reduces the steering angle given by the P controller. When current error is less than previous error it counter steers to avoid the oscillations around the steady state.</p>
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+<p> The main drawback with the PD controller is that it is highly vulnerable to noise. Previously we assumed that the wheels are perfeclty aligned with the 0 degress, but whenever there is a systematic bias such that the wheel may not be 100% aligned with 0 degress but may have some offset as below.</p>
 
-## Code Style
+<img src="" alt="bias"/>
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+<p> As PD controller is vulnerable to noise it cannot solve this problem and the error does not converge to 0 and stays at some higher value.</p>
 
-## Project Instructions and Rubric
+<h3> Proportional Integral Controller </h3>
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+<p> An Integral controller can be used to solve the problem of systematic bias because integral controller always brings the stady state to 0 irrespective of any noise. The integral controller computes the sum of previous CTE error and multiplies by a constant Ki. Whenerver it find that the error remains higher (when PD didn't converge) based on the Ki value it applies a steering action to eliminate the error and bring the car closer to the center of lane eventhough there exist a systematic bias.</p>
 
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
+<p> The only drawback of having the Integral element is that,it always tries to bring the error to 0 and practically it is not possible and the error can only be brought down to a lower value. The Integral element still steers even when the error is lower and that causes overshoot which leads to oscillations. When the speed is higher, these oscillations are amplified and car is thrown out of track. Thus to solve this we always keep a fairly lower value for Ki.</p>
 
-## Hints!
+<p> The Integral element is also modified to take the previous 50 CTE error alone detect the current steering angle.This allows faster response when the PD didn't converge and we have sharp corners.</p>
 
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
 
-## Call for IDE Profiles Pull Requests
 
-Help your fellow students!
 
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
 
