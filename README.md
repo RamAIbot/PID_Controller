@@ -4,7 +4,7 @@
 
 <p> The project focuses on designing a PID controller for the autonomous vehicle to drive through the simulated environment which is done by Unity. The car travles with a constant speed of 30mph and the PID controller controls the steering angles based on the manoeuvre. An additional PID controller is used to keep the speed at 30mph to prevent any accidents.</p>
 
-<img src="" alt="title"/>
+<img src="Capture.JPG" alt="title"/>
 
 <h2> PID Controller </h2>
 
@@ -20,7 +20,7 @@
 
 <p> The main drawback with the PD controller is that it is highly vulnerable to noise. Previously we assumed that the wheels are perfeclty aligned with the 0 degress, but whenever there is a systematic bias such that the wheel may not be 100% aligned with 0 degress but may have some offset as below.</p>
 
-<img src="" alt="bias"/>
+<img src="Capture1.JPG" alt="bias"/>
 
 <p> As PD controller is vulnerable to noise it cannot solve this problem and the error does not converge to 0 and stays at some higher value.</p>
 
@@ -35,13 +35,13 @@
 
 <h2>PID Equation </h2>
 
-<img src="" alt="pid"/>
+<img src="Capture2.JPG" alt="pid"/>
 
 <h2> System architecture </h2>
 
 <p> We use separate controller to control the steering angle and a separate controller for controlling the throttle. The steering angle controller uses CTE as the error metric while the throttle controller uses Current Speed -  desired speed (30mph) as the error metric.</p>
 
-<img src="" alt="control"/>
+<img src="Capture3.JPG" alt="control"/>
 
 <h2> Tuned Values </h2>
 
@@ -65,6 +65,8 @@
 ```
 Download the simulator from the repo
 https://github.com/udacity/self-driving-car-sim/releases
+
+./install-ubuntu  //To download websocket and other dependencies
 Make a build directory: mkdir build && cd build
 Compile: cmake .. && make
 Run it: ./pid
@@ -73,6 +75,7 @@ Run it: ./pid
 <h2> Output Recorded Videos </h2>
 
 ```
+https://drive.google.com/file/d/1Hp5XJEjDQuSTNVn4WfUSJ1mN2lhr6udF/view?usp=sharing
 
 ```
 
@@ -80,15 +83,18 @@ Run it: ./pid
 
 <h3>Architecture of high speed control</h3>
 
-<img src="" alt="highspeed"/>
+<img src="Capture4.JPG" alt="highspeed"/>
 
-<p> The above controller works well for lower speeds of 30mph.Sometimes in straight lanes we must increase the speed to reach the goal faster.In the same way we need to decrease the speed which was in the stright lane to make a turn. To facilitate that we have added additional controller for speed reduction. Here we just use PD controller. The key here is that we only reduce the speed when the absolute value CTE is higher and only when the speed is greater than 30mph. Since at 30mph the car don't go to oscillations in sharp turns.</p>
+<p> The previous controller works well for lower speeds of 30mph.Sometimes in straight lanes we must increase the speed to reach the goal faster.In the same way we need to decrease the speed which was in the stright lane to make a turn. To facilitate that we have added additional controller for speed reduction. Here we just use PD controller. The key here is that we only reduce the speed when the absolute value CTE is higher and only when the speed is greater than 30mph. Since at 30mph the car don't go to oscillations in sharp turns.</p>
 
 <p> The drawback of this method is that the car oscillates around the steady state due to the sudden reduction speed. If we just reduce the throttle value in steps of 0.1 when the bsolute value CTE is higher and  when the speed is greater than 30mph, this may fail at sharp turns since after travelling through the straight road before reaching the turn the car will be at high speed and gradual decrease may not be sufficient to make a turn. Thus the PD controller solves that but we may have oscillation around the steady state.</p>
+
+<p> The project is available in highspeedtesting folder for details.</p>
 
 <h3> Output of high speed control </h3>
 
 ```
+https://drive.google.com/file/d/1lvEvEfd4XRXQtS7QTnYQvqFByBd9xQk3/view?usp=sharing
 
 ```
 
